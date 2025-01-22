@@ -76,12 +76,8 @@ const postTime = async () => {
     console.log('------------------------------------------------');
     console.log('The day has come to an end. All adventurers went to sleep.');
     
-    
-    
-    
-    
     // Update all characters in the database
-    // await updateCharacters(charactersWithReducedStamina);
+    await updateCharacters(charactersWithReducedStamina);
 
     postingTime.km_total = totalTraveled + postingTime.km_traveled;
 
@@ -357,6 +353,11 @@ const rollND4 = (n) => {
 
 const updateCharacters = async (characters) => {
   for (const character of characters) {
+    // Only include the _id fields for weapons, saddlebags, and precious stones
+    character.equipment.weapons = character.equipment.weapons.map(weapon => ({ _id: weapon._id }));
+    character.equipment.saddlebag = character.equipment.saddlebag.map(saddlebag => ({ _id: saddlebag._id }));
+    character.equipment.pouch.precious_stones = character.equipment.pouch.precious_stones.map(stone => ({ _id: stone._id }));
+
     await Character.findByIdAndUpdate(character._id, character);
   }
 }
