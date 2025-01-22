@@ -18,6 +18,16 @@ const getAllCharacters = async (req, res) => {
   }
 };
 
+const getAllUnpopulatedCharacters = async (req, res) => {
+  try {
+    const characters = await characterService.getAllCharacters();
+
+    res.status(200).json(characters);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching characters', error: error.message });
+  }
+};
+
 const populateCharacters = async (characters) => {
   // console.log("ABOUT TO POPULATE CHARACTER");
   for(let i = 0; i < characters.length; i++){
@@ -43,5 +53,6 @@ const populateCharacter = async (character) => {
 }
 
 module.exports = {
-  getAllCharacters
+  getAllCharacters,
+  getAllUnpopulatedCharacters
 };
