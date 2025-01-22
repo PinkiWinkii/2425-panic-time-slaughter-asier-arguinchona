@@ -21,16 +21,6 @@ mongoose
     app.listen(PORT, async () => {
       console.log(`Server running on port ${PORT}`);
 
-      // Llamar a la ruta de characters y imprimir en consola
-      try {
-
-        const postTimeResponse = await axios.post(`http://localhost:${PORT}/postTime`);
-        console.log('POST TIME RESPONSE');
-        console.log(postTimeResponse.data);
-      } catch (error) {
-        console.error('Error posting times:', error.message);
-      }
-
     });
   })
   .catch((error) => {

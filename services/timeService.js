@@ -60,14 +60,17 @@ const postTime = async () => {
     const recollectedCharacters = await recollectionCharacters(restedCharacters, saddleBags, preciousStones);
     console.log('------------------------------------------------');
     console.log('The NOON arrived. Its 12:00PM, time to travel a little bit.');
-
+    console.log('------------------------------------------------');
     const travelDistance = calculateTravelDistance();
     postingTime.km_traveled = travelDistance;
+    postingTime.km_total = totalTraveled + postingTime.km_traveled;
 
     console.log('The party traveled for', travelDistance, 'kms.');
     console.log('------------------------------------------------');
     console.log('EVENING is here. Its 17:00PM, adventurers might go crazy.');
-    const updatedCharacters = await jokerRoll(characters);
+    const updatedCharacters = await jokerRoll(recollectedCharacters);
+    console.log('------------------------------------------------');
+    console.log('Adventurers stamina will be decreased after the crazyness.');
     console.log('------------------------------------------------');
     const charactersWithReducedStamina = reduceStamina(updatedCharacters, postingTime.day_week);
     console.log('------------------------------------------------');
@@ -77,14 +80,12 @@ const postTime = async () => {
     console.log('The day has come to an end. All adventurers went to sleep.');
     
     // Update all characters in the database
-    await updateCharacters(charactersWithReducedStamina);
-
-    postingTime.km_total = totalTraveled + postingTime.km_traveled;
+    await updateCharacters(charactersAfterNightAction);
 
     const newTime = new Time(postingTime); // Adjusted to access the correct object
     const savedTime = await newTime.save();
 
-    return savedTime;
+    return { time: savedTime, characters: charactersWithReducedStamina };
 
   } catch (error) {
     console.error('Error posting times:', error.message);
