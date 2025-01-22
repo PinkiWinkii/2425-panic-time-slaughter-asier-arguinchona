@@ -9,7 +9,8 @@ const getAllCharacters = async (req, res) => {
     const populatedCharacters = await populateCharacters(characters);
 
     // console.log('POPULATED CHARACTERS');
-    // console.log(populatedCharacters[0].equipment.pouch.precious_stones);
+    // console.log(populatedCharacters[0].equipment.saddlebag);
+    // console.log(populatedCharacters[1].equipment.saddlebag);
     
     res.status(200).json(populatedCharacters);
   } catch (error) {
