@@ -54,5 +54,20 @@ describe('Character Controller Tests', () => {
     expect(res.json).toHaveBeenCalledWith({ error: 'Error fetching characters: Database error', message: 'Error fetching characters' });
   });
 
-  
+  it('should return an empty array if no characters are found', async () => {
+    Character.find.mockResolvedValue([]);
+
+    const req = {}; 
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(), 
+    };
+
+    await getAllCharacters(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+
+    expect(res.json).toHaveBeenCalledWith([]);
+  });
+
 });
