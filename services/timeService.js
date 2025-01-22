@@ -35,8 +35,8 @@ const postTime = async () => {
     console.log('Times:', times);
     console.log('Saddlebags:', saddleBags);
     console.log('Precious Stones:', preciousStones);
-    
-    
+
+
 
     const postingTime = times[times.length - 1];
     delete postingTime._id;
@@ -47,20 +47,20 @@ const postTime = async () => {
     await changeTimeDay(postingTime);
 
     console.log('Good MORNING fellow Adventurers, today is', postingTime.day_week, 'and the day number is', postingTime.day_number);
-    console.log('We have traveled ', totalTraveled, 'km so far.'); 
+    console.log('We have traveled ', totalTraveled, 'km so far.');
 
     console.log('We are at 5:00 AM, time to start our journey');
     console.log('Thalys the benevolent starts the healing process');
     console.log('------------------------------------------------');
-    
-    
+
+
     const restedCharacters = await restCharacters(characters);
     console.log('------------------------------------------------');
     console.log('Recollection starts now!');
     const recollectedCharacters = await recollectionCharacters(restedCharacters, saddleBags, preciousStones);
     console.log('------------------------------------------------');
     console.log('The NOON arrived. Its 12:00PM, time to travel a little bit.');
-    
+
     const travelDistance = calculateTravelDistance();
     postingTime.km_traveled = travelDistance;
 
@@ -68,9 +68,9 @@ const postTime = async () => {
     console.log('------------------------------------------------');
     console.log('EVENING is here. Its 17:00PM, adventurers might go crazy.');
     const updatedCharacters = await jokerRoll(characters);
-
+    console.log('------------------------------------------------');
     // Update all characters in the database
-   // await updateCharacters(updatedCharacters);
+    // await updateCharacters(updatedCharacters);
 
     postingTime.km_total = totalTraveled + postingTime.km_traveled;
 
@@ -91,13 +91,13 @@ const getTotalTraveledKM = async (times) => {
   for (let i = 0; i < times.length; i++) {
     const time = times[i];
     console.log(time.km_traveled);
-    
+
     totalTraveled += time.km_traveled;
   }
 
   console.log('TOTAL TRAVELED');
   console.log(totalTraveled);
-  
+
   return totalTraveled;
 }
 
@@ -134,7 +134,7 @@ const restCharacters = async (characters) => {
   characters.forEach(character => {
     const points = Math.floor(Math.random() * 2) + 1; // Random 1 or 2 points
     const attribute = Math.random() < 0.5 ? 'strength' : 'dexterity'; // Random choose attribute
-    character[attribute] += points;
+    character.stats[attribute] += points;
     console.log(`${character.name} gains ${points} ${attribute} points.`);
   });
   return characters;
@@ -181,21 +181,21 @@ const roll1D10 = () => Math.floor(Math.random() * 10) + 1;
 
 const jokerRoll = async (characters) => {
   const orderedCharacters = characters;
-  
+
   const randomIndex = Math.floor(Math.random() * characters.length);
   const firstCharacter = orderedCharacters.splice(randomIndex, 1)[0];
 
   console.log(`The joker rolled a '${randomIndex}', therefore ${firstCharacter.name} is chosen to act first.`);
 
   // Execute action for the first character
-  await executeCharacterAction(firstCharacter);
+  await executeCharacterAction(firstCharacter, characters);
 
   // Sort remaining characters by dexterity in descending order
   orderedCharacters.sort((a, b) => b.stats.dexterity - a.stats.dexterity);
 
   // Execute actions for the remaining characters
   for (let i = 0; i < orderedCharacters.length; i++) {
-    await executeCharacterAction(orderedCharacters[i]);
+    await executeCharacterAction(orderedCharacters[i], characters);
   }
 
   // Return the characters after all actions
@@ -203,34 +203,145 @@ const jokerRoll = async (characters) => {
 }
 
 const executeCharacterAction = async (character, characters) => {
+
+  const targetIndex = Math.floor(Math.random() * (characters.length - 1));
+  const target = characters[targetIndex >= characters.indexOf(character) ? targetIndex + 1 : targetIndex];
+  const roll = roll1D100();
+
   switch (character.occupation) {
     case 'warrior':
-      console.log(`${character.name} the warrior attacks with their sword.`);
+      console.log(`${character.name} the warrior prepares to attack.`);
+
+      if (roll < character.stats.dexterity) {
+        if (character.equipment.weapons[0].quality > 0) {
+          const numDieDamage = character.equipment.weapons[0].num_die_damage;
+          const weaponDamage = rollND4(numDieDamage) + Math.ceil(character.equipment.weapons[0].quality / 5);
+          const totalDamage = weaponDamage + Math.ceil(character.stats.dexterity / 4);
+          target.stats.strength -= totalDamage;
+          console.log(`${character.name} attacks ${target.name} dealing ${totalDamage} damage.`);
+        } else {
+          console.log(`${character.name} attacks ${target.name} dealing 0 damage because of the quality.`);
+        }
+      } else {
+        console.log(`${character.name} misses the attack.`);
+      }
       break;
     case 'mage':
-      console.log(`${character.name} the mage casts a spell.`);
+      console.log(`${character.name} the mage is about to cast a spell.`);
+
+      if (roll < character.stats.dexterity) {
+        if (character.equipment.weapons[0].quality > 0) {
+          const numDieDamage = character.equipment.weapons[0].num_die_damage;
+          const weaponDamage = rollND4(numDieDamage) + Math.ceil(character.equipment.weapons[0].quality / 5);
+          const totalDamage = weaponDamage + Math.ceil(character.stats.dexterity / 4);
+          target.stats.strength -= totalDamage;
+          console.log(`${character.name} attacks ${target.name} dealing ${totalDamage} damage.`);
+        } else {
+          console.log(`${character.name} attacks ${target.name} dealing 0 damage because of the quality.`);
+        }
+      } else {
+        console.log(`${character.name} misses the attack.`);
+      }
       break;
     case 'gambler':
-      console.log(`${character.name} the gambler rolls the dice.`);
+      console.log(`${character.name} the gambler plays a bet game with ${target.name}.`);
+      const gamblerRoll = roll1D2();
+
+        if (gamblerRoll === 1) {
+          if (target.equipment.pouch.precious_stones.length > 0) {
+            const preciousStone = target.equipment.pouch.precious_stones.pop();
+            character.equipment.pouch.precious_stones.push(preciousStone);
+            console.log(`${character.name} wins the bet and takes the ${preciousStone.name} from ${target.name}.`);
+          } else {
+            console.log(`${target.name} has no precious stones to give.`);
+          }
+        } else {
+          if (character.equipment.pouch.precious_stones.length > 0) {
+            const preciousStone = character.equipment.pouch.precious_stones.pop();
+            target.equipment.pouch.precious_stones.push(preciousStone);
+            console.log(`${target.name} wins the bet and takes the ${preciousStone.name} from ${character.name}.`);
+          } else {
+            console.log(`${character.name} has no precious stones to give.`);
+          }
+        }
+      
       break;
     case 'priest':
-      console.log(`${character.name} the priest offers a prayer.`);
+      console.log(`${character.name} the priest only offers a prayer. He already acted before.`);
       break;
-    case 'joker':
-      console.log(`${character.name} the joker performs a trick.`);
-      break;
+
     case 'thug':
-      console.log(`${character.name} the thug intimidates the enemy.`);
+      console.log(`${character.name} the thug is ready to act against ${target.name}`);
+      const stealRoll = roll1D3();
+      if (stealRoll === 1) {
+        if (target.equipment.pouch.gold > 0) {
+          target.equipment.pouch.gold -= 1;
+          character.equipment.pouch.gold += 1;
+          console.log(`${character.name} steals 1 gold from ${target.name}.`);
+        } else {
+          console.log(`${target.name} has no gold to steal.`);
+
+        }
+      } else if (stealRoll === 2) {
+        if (target.equipment.pouch.coins > 0) {
+          const coins = character.stats.dexterity / 2;
+          target.equipment.pouch.coins -= coins;
+          character.equipment.pouch.coins += coins;
+        } else {
+          console.log(`${target.name} has no coins to steal.`);
+        }
+      } else if (stealRoll === 3) {
+        if (target.equipment.quiver > 0) {
+          target.equipment.quiver -= 1;
+          character.equipment.quiver += 1;
+          console.log(`${character.name} steals 1 arrow from ${target.name}.`);
+        } else {
+          console.log(`${target.name} has no arrows to steal.`);
+        }
+      } else {
+        console.log(`${character.name} failed to do anything to ${target.name}`);
+      }
+
+      if (roll < character.stats.dexterity) {
+        if (character.equipment.weapons[0].quality > 0) {
+          const numDieDamage = character.equipment.weapons[0].num_die_damage;
+          const weaponDamage = rollND4(numDieDamage) + Math.ceil(character.equipment.weapons[0].quality / 5);
+          const totalDamage = weaponDamage + Math.ceil(character.stats.dexterity / 4);
+          target.stats.strength -= totalDamage;
+          console.log(`${character.name} attacks ${target.name} dealing ${totalDamage} damage.`);
+        } else {
+          console.log(`${character.name} attacks ${target.name} dealing 0 damage because of the quality.`);
+        }
+      } else {
+        console.log(`${character.name} misses the attack.`);
+      }
+
+      if (target.equipment.quiver > 0) {
+        target.equipment.quiver -= 1;
+        character.equipment.quiver += 1;
+        console.log(`${character.name} steals 1 arrow from ${target.name}.`);
+      } else {
+        console.log(`${target.name} has no arrows to steal.`);
+      }
       break;
     case 'peasant':
       console.log(`${character.name} the peasant tends to the fields.`);
       break;
     default:
-      console.log(`${character.name} does not know what to do.`);
+      //console.log(`${character.name} does not know what to do.`);
+      //If its the joker nothing
       break;
   }
 
   return characters;
+}
+
+const rollND4 = (n) => {
+  let total = 0;
+  for (let i = 0; i < n; i++) {
+    total += roll1D4();
+  }
+  return total;
 }
 
 const updateCharacters = async (characters) => {
