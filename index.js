@@ -23,34 +23,13 @@ mongoose
 
       // Llamar a la ruta de characters y imprimir en consola
       try {
-        const characters = await axios.get(`http://localhost:${PORT}/characters`);
-        // console.log('Characters:', characters.data);
-        try {
 
-          const timeResponse = await axios.get(`http://localhost:${PORT}/getTimes`);
-          // console.log('Times:', timeResponse.data);
-
-          try {
-            const newTime = timeResponse.data[timeResponse.data.length - 1];
-            delete newTime._id;
-
-            const postTimeResponse = await axios.post(`http://localhost:${PORT}/postTime`);
-            console.log('POST TIME RESPONSE');
-            console.log(postTimeResponse.data);
-          } catch (error) {
-            console.error('Error posting times:', error.message);
-          }
-
-        } catch (error) {
-          console.error('Error fetching times:', error.message);
-        }
-
+        const postTimeResponse = await axios.post(`http://localhost:${PORT}/postTime`);
+        console.log('POST TIME RESPONSE');
+        console.log(postTimeResponse.data);
       } catch (error) {
-        console.error('Error fetching characters:', error.message);
+        console.error('Error posting times:', error.message);
       }
-
-
-
 
     });
   })

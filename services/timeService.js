@@ -18,12 +18,20 @@ const postTime = async () => {
 
     const timeResponse = await axios.get(`http://localhost:${PORT}/getTimes`);
     const charactersResponse = await axios.get(`http://localhost:${PORT}/characters`);
+    const saddleBagResponse = await axios.get(`http://localhost:${PORT}/saddleBags`);
+    const preciousStonesResponse = await axios.get(`http://localhost:${PORT}/preciousStones`);
 
     const times = timeResponse.data;
     const characters = charactersResponse.data;
+    const saddleBags = saddleBagResponse.data;
+    const preciousStones = preciousStonesResponse.data;
 
     console.log('Characters:', characters);
     console.log('Times:', times);
+    console.log('Saddlebags:', saddleBags);
+    console.log('Precious Stones:', preciousStones);
+    
+    
 
     const postingTime = times[times.length - 1];
     delete postingTime._id;
@@ -44,6 +52,8 @@ const postTime = async () => {
     const restedCharacters = await restCharacters(characters);
     console.log('------------------------------------------------');
     console.log('Recollection starts now!');
+    const recollectedCharacters = await recollectionCharacters(restedCharacters, saddleBags, preciousStones);
+    console.log('------------------------------------------------');
     
     postingTime.km_total = totalTraveled + postingTime.km_traveled;
 
@@ -118,21 +128,36 @@ const restCharacters = async (characters) => {
   return characters;
 }
 
-const recollectionCharacters = async (characters) => {
-  characters.forEach(character => {
-    const roll = roll1D100();
+const recollectionCharacters = async (characters, saddlebags, preciousStones) => {
+  for (const character of characters) {
+    const roll = await roll1D100();
     if (roll >= 1 && roll <= 30) {
       character.equipment.pouch.gold += 1;
       console.log(`${character.name} gains 1 gold.`);
     } else if (roll >= 31 && roll <= 80) {
-      const coins = roll1D20();
+      const coins = await roll1D20();
       character.equipment.pouch.coins += coins;
       console.log(`${character.name} gains ${coins} coins.`);
     } else if (roll >= 81 && roll <= 100) {
-      // Handle this case later
+      const preciousStone = await getRandomPreciousStone(preciousStones);
+      character.equipment.pouch.precious_stones.push(preciousStone);
+      console.log(`${character.name} gains a precious stone: ${preciousStone.name}.`);
     }
-  });
+    const saddlebag = await getRandomSaddlebag(saddlebags);
+    character.equipment.saddlebag.push(saddlebag);
+    console.log(`${character.name} gains a saddlebag: ${saddlebag.name}.`);
+  }
   return characters;
+}
+
+const getRandomSaddlebag = async (saddlebags) => {
+  const index = Math.floor(Math.random() * saddlebags.length);
+  return saddlebags[index];
+}
+
+const getRandomPreciousStone = async (preciousStones) => {
+  const index = Math.floor(Math.random() * preciousStones.length);
+  return preciousStones[index];
 }
 
 const roll1D100 = () => Math.floor(Math.random() * 100) + 1;
@@ -145,5 +170,4 @@ const roll1D10 = () => Math.floor(Math.random() * 10) + 1;
 module.exports = {
   getAllTimes,
   postTime,
-
 };
