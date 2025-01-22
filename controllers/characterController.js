@@ -4,26 +4,26 @@ const Character = require('../models/Character');
 const getAllCharacters = async (req, res) => {
   try {
     const characters = await characterService.getAllCharacters();
-    console.log('Characters in controller:');
-    console.log(characters);
+    // console.log('Characters in controller:');
+    // console.log(characters);
     const populatedCharacters = await populateCharacters(characters);
 
-    console.log('POPULATED CHARACTERS');
-    console.log(populatedCharacters[0].equipment.pouch.precious_stones);
+    // console.log('POPULATED CHARACTERS');
+    // console.log(populatedCharacters[0].equipment.pouch.precious_stones);
     
-    res.status(200).json(characters);
+    res.status(200).json(populatedCharacters);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching characters', error: error.message });
   }
 };
 
 const populateCharacters = async (characters) => {
-  console.log("ABOUT TO POPULATE CHARACTER");
+  // console.log("ABOUT TO POPULATE CHARACTER");
   for(let i = 0; i < characters.length; i++){
     try {
-      console.log("POPULATING CHARACTER");
+      // console.log("POPULATING CHARACTER");
       const character = characters[i];
-      console.log("CHARACTER: ", character);
+      // console.log("CHARACTER: ", character);
       characters[i] = await populateCharacter(character);
     } catch (error) {
       console.error("Error populating character:", error);
