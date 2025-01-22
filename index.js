@@ -21,7 +21,7 @@ mongoose
       // Llamar a la ruta de characters y imprimir en consola
       try {
         const response = await axios.get(`http://localhost:${PORT}/characters`);
-        console.log('Characters:', response.data);
+        //console.log('Characters:', response.data);
       } catch (error) {
         console.error('Error fetching characters:', error.message);
       }
