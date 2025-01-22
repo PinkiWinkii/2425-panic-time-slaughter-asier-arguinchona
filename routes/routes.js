@@ -4,6 +4,8 @@ const characterController = require('../controllers/characterController');
 const timeController = require('../controllers/timeController');
 
 router.get('/characters', characterController.getAllCharacters);
-router.get('/times', timeController.getAllTimes);
+router.get('/getTimes', timeController.getAllTimes);
+
+router.post('/postTime', timeController.postTime);
 
 module.exports = router;
