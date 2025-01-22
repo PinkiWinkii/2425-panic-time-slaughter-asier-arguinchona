@@ -69,8 +69,12 @@ const postTime = async () => {
     console.log('EVENING is here. Its 17:00PM, adventurers might go crazy.');
     const updatedCharacters = await jokerRoll(characters);
     console.log('------------------------------------------------');
+    
+    // Reduce stamina based on the day of the week
+    const charactersWithReducedStamina = reduceStamina(updatedCharacters, postingTime.day_week);
+    
     // Update all characters in the database
-    // await updateCharacters(updatedCharacters);
+    // await updateCharacters(charactersWithReducedStamina);
 
     postingTime.km_total = totalTraveled + postingTime.km_traveled;
 
@@ -348,6 +352,15 @@ const updateCharacters = async (characters) => {
   for (const character of characters) {
     await Character.findByIdAndUpdate(character._id, character);
   }
+}
+
+const reduceStamina = (characters, dayWeek) => {
+  const reduction = (dayWeek === 'Saturday' || dayWeek === 'Sunday') ? 4 : 2;
+  characters.forEach(character => {
+    character.stats.stamina = Math.max(0, character.stats.stamina - reduction);
+    console.log(`${character.name}'s stamina reduced by ${reduction}. Current stamina: ${character.stats.stamina}`);
+  });
+  return characters;
 }
 
 module.exports = {
