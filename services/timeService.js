@@ -69,9 +69,16 @@ const postTime = async () => {
     console.log('EVENING is here. Its 17:00PM, adventurers might go crazy.');
     const updatedCharacters = await jokerRoll(characters);
     console.log('------------------------------------------------');
-    
-    // Reduce stamina based on the day of the week
     const charactersWithReducedStamina = reduceStamina(updatedCharacters, postingTime.day_week);
+    console.log('------------------------------------------------');
+    console.log('The NIGHT has come. Its 22:00PM. Adventurers prepare a campfire and will camp till the next morning.');
+    const charactersAfterNightAction = await executeNightAction(charactersWithReducedStamina);
+    console.log('------------------------------------------------');
+    console.log('The day has come to an end. All adventurers went to sleep.');
+    
+    
+    
+    
     
     // Update all characters in the database
     // await updateCharacters(charactersWithReducedStamina);
@@ -360,6 +367,52 @@ const reduceStamina = (characters, dayWeek) => {
     character.stats.stamina = Math.max(0, character.stats.stamina - reduction);
     console.log(`${character.name}'s stamina reduced by ${reduction}. Current stamina: ${character.stats.stamina}`);
   });
+  return characters;
+}
+
+const executeNightAction = async (characters) => {
+  const songs = [
+    'When the fire burns within',
+    'A side effect of recovery',
+    'Freddy Mercury, the real wayward',
+    'Pazus, the impassible: from boast to fail'
+  ];
+  const randomSong = songs[Math.floor(Math.random() * songs.length)];
+  console.log(`The joker sings: '${randomSong}'`);
+
+  characters.forEach(character => {
+    if (character.stats.stamina <= 50) {
+      let foodToEat = character.stats.stamina < 20 ? 2 : 1;
+      while (foodToEat > 0 && character.equipment.saddlebag.length > 0) {
+        const food = character.equipment.saddlebag.pop();
+        character.stats.stamina += food.recover_stamina;
+        console.log(`${character.name} eats ${food.name} and recovers ${food.recover_stamina} stamina. Current stamina: ${character.stats.stamina}`);
+        foodToEat--;
+      }
+    }
+
+    // Adjust weapon quality based on type
+    if(character.equipment.weapons.length > 0) {
+      character.equipment.weapons.forEach(weapon => {
+        if (weapon.type === 'common') {
+          weapon.quality = Math.max(0, weapon.quality - 1);
+          console.log(`${character.name} lost 1 quality on his ${weapon.name}.`);
+          
+        } else if (weapon.type === 'arcane') {
+          weapon.quality = Math.min(50, weapon.quality + 1);
+          console.log(`${character.name} gains 1 quality on his ${weapon.name}.`);
+        }
+      });
+    }
+
+    const recoveryRoll = roll1D3();
+    character.stats.strength += recoveryRoll;
+    console.log(`The priest recovered ${recoveryRoll} to ${character.name}.`);
+    
+    
+  });
+  
+
   return characters;
 }
 
