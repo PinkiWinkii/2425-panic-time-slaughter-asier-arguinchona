@@ -17,14 +17,26 @@ const postTime = async () => {
   try {
 
     const timeResponse = await axios.get(`http://localhost:${PORT}/getTimes`);
-    console.log('Times:', timeResponse.data);
+    const charactersResponse = await axios.get(`http://localhost:${PORT}/characters`);
 
-    const postingTime = timeResponse.data[timeResponse.data.length - 1];
+    const times = timeResponse.data;
+    const characters = charactersResponse.data;
+
+    console.log('Characters:', characters);
+    console.log('Times:', times);
+
+    const postingTime = times[times.length - 1];
     delete postingTime._id;
 
     postingTime.day_number++;
 
-    changeTimeDay(postingTime);
+    const totalTraveled = await getTotalTraveledKM(times);
+    postingTime.km_total = totalTraveled + postingTime.km_traveled;
+
+    console.log(postingTime.km_total);
+    
+
+    await changeTimeDay(postingTime);
 
     const newTime = new Time(postingTime); // Adjusted to access the correct object
     const savedTime = await newTime.save();
@@ -36,6 +48,21 @@ const postTime = async () => {
   }
 
 
+}
+
+const getTotalTraveledKM = async (times) => {
+  let totalTraveled = 0;
+  for (let i = 0; i < times.length; i++) {
+    const time = times[i];
+    console.log(time.km_traveled);
+    
+    totalTraveled += time.km_traveled;
+  }
+
+  console.log('TOTAL TRAVELED');
+  console.log(totalTraveled);
+  
+  return totalTraveled;
 }
 
 const changeTimeDay = async (time) => {
