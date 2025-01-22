@@ -12,7 +12,7 @@ const getAllTimes = async (req, res) => {
 
 const postTime = async (req, res) => {
   try {
-    const time = await timeservice.postTime(req.body);
+    const time = await timeservice.postTime();
     
     res.status(200).json(time);
   } catch (error) {

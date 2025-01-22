@@ -23,38 +23,35 @@ mongoose
 
       // Llamar a la ruta de characters y imprimir en consola
       try {
-        const response = await axios.get(`http://localhost:${PORT}/characters`);
-        // console.log('Characters:', response.data);
-        
-        
+        const characters = await axios.get(`http://localhost:${PORT}/characters`);
+        // console.log('Characters:', characters.data);
+        try {
+
+          const timeResponse = await axios.get(`http://localhost:${PORT}/getTimes`);
+          // console.log('Times:', timeResponse.data);
+
+          try {
+            const newTime = timeResponse.data[timeResponse.data.length - 1];
+            delete newTime._id;
+
+            const postTimeResponse = await axios.post(`http://localhost:${PORT}/postTime`);
+            console.log('POST TIME RESPONSE');
+            console.log(postTimeResponse.data);
+          } catch (error) {
+            console.error('Error posting times:', error.message);
+          }
+
+        } catch (error) {
+          console.error('Error fetching times:', error.message);
+        }
+
       } catch (error) {
         console.error('Error fetching characters:', error.message);
       }
 
-      try {
 
-        const timeResponse = await axios.get(`http://localhost:${PORT}/getTimes`);
-        console.log('Times:', timeResponse.data);
-        
-        
-      } catch (error) {
-        console.error('Error fetching times:', error.message);
-      }
 
-      try {
-        const newTime = {
-          "day_number": 4,
-          "day_week": "Wednesday",
-          "km_traveled": 5,
-          "km_total": 12
-        }
 
-        const postTimeResponse = await axios.post(`http://localhost:${PORT}/postTime`, { time: newTime });
-        console.log('POSTT TIME RESPONSE');
-        console.log(postTimeResponse.data);
-      } catch (error) {
-        console.error('Error posting times:', error.message);
-      }
     });
   })
   .catch((error) => {
