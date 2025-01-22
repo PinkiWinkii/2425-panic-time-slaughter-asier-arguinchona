@@ -31,12 +31,26 @@ const postTime = async () => {
     postingTime.day_number++;
 
     const totalTraveled = await getTotalTraveledKM(times);
+    await changeTimeDay(postingTime);
+
+    console.log('Good Morning fellow Adventurers, today is', postingTime.day_week, 'and the day number is', postingTime.day_number);
+    console.log('We have traveled ', totalTraveled, 'km so far.'); 
+
+    console.log('We are at 5:00 AM, time to start our journey');
+    console.log('Thalys the benevolent starts the healing process');
+    console.log('------------------------------------------------');
+    
+    
+    const restedCharacters = await restCharacters(characters);
+    console.log('------------------------------------------------');
+    console.log('Recollection starts now!');
+    
     postingTime.km_total = totalTraveled + postingTime.km_traveled;
 
-    console.log(postingTime.km_total);
+
     
 
-    await changeTimeDay(postingTime);
+
 
     const newTime = new Time(postingTime); // Adjusted to access the correct object
     const savedTime = await newTime.save();
@@ -94,7 +108,42 @@ const changeTimeDay = async (time) => {
   return time;
 }
 
+const restCharacters = async (characters) => {
+  characters.forEach(character => {
+    const points = Math.floor(Math.random() * 2) + 1; // Random 1 or 2 points
+    const attribute = Math.random() < 0.5 ? 'strength' : 'dexterity'; // Random choose attribute
+    character[attribute] += points;
+    console.log(`${character.name} gains ${points} ${attribute} points.`);
+  });
+  return characters;
+}
+
+const recollectionCharacters = async (characters) => {
+  characters.forEach(character => {
+    const roll = roll1D100();
+    if (roll >= 1 && roll <= 30) {
+      character.equipment.pouch.gold += 1;
+      console.log(`${character.name} gains 1 gold.`);
+    } else if (roll >= 31 && roll <= 80) {
+      const coins = roll1D20();
+      character.equipment.pouch.coins += coins;
+      console.log(`${character.name} gains ${coins} coins.`);
+    } else if (roll >= 81 && roll <= 100) {
+      // Handle this case later
+    }
+  });
+  return characters;
+}
+
+const roll1D100 = () => Math.floor(Math.random() * 100) + 1;
+const roll1D20 = () => Math.floor(Math.random() * 20) + 1;
+const roll1D4 = () => Math.floor(Math.random() * 4) + 1;
+const roll1D3 = () => Math.floor(Math.random() * 3) + 1;
+const roll1D2 = () => Math.floor(Math.random() * 2) + 1;
+const roll1D10 = () => Math.floor(Math.random() * 10) + 1;
+
 module.exports = {
   getAllTimes,
-  postTime
+  postTime,
+
 };
