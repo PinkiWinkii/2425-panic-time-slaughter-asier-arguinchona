@@ -1,18 +1,27 @@
 const mongoose = require('mongoose');
 
 const characterSchema = new mongoose.Schema({
-  id: {
-    type: String, // Identificador único
-    required: true,
-    unique: true
+  name: String,
+  occupation: String,
+  description: String,
+  stats: {
+    strength: Number,
+    dexterity: Number,
+    stamina: Number
   },
-  username: {
-    type: String, // Nombre de usuario único
-    required: true,
-    unique: true
+  equipment: {
+    saddlebag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Saddlebags' }],
+    quiver: Number,
+    weapons: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Weapons' }],
+    pouch: {
+      coins: Number,
+      gold: Number,
+      precious_stones: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PreciousStones' }]
+    },
+    miscellaneous: []
   }
 });
 
 const Character = mongoose.model('Character', characterSchema);
 
-module.exports = User;
+module.exports = Character;
